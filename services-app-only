@@ -1,0 +1,48 @@
+#!/bin/bash
+#
+#  Command Line Interface to start the vbb-rest-2-ngsi application service
+#
+#  For this app the commands are merely a convenience script to run docker-compose
+#
+
+set -e
+
+if (( $# != 1 )); then
+	echo "Illegal number of parameters"
+	echo "usage: services-app-only [start|stop]"
+	exit 1
+fi
+
+stoppingContainers () {
+	echo "Stopping containers"
+	docker-compose -f docker-compose-app-only.yml --log-level ERROR -p vbb2ngsi down --remove-orphans
+}
+
+displayServices () {
+	echo ""
+	docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+	echo ""
+}
+
+command="$1"
+case "${command}" in
+	"help")
+		echo "usage: services-app-only [start|stop]"
+		;;
+	"start")
+		stoppingContainers
+		echo -e "Starting 1 container:"
+		echo -e "a \033[1;95mvbb-rest-2-ngsi\033[0m Node.Js app"
+		echo ""
+		docker-compose -f docker-compose-app-only.yml --log-level ERROR -p vbb2ngsi up -d --remove-orphans
+		displayServices
+		;;
+	"stop")
+		stoppingContainers
+		;;
+	*)
+		echo "Command not Found."
+		echo "usage: services-app-only [start|stop]"
+		exit 127;
+		;;
+esac

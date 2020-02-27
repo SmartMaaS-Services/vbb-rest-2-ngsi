@@ -1,0 +1,24 @@
+version: "3.5"
+services:
+  # VBB-REST-2-NGSI Node.js App
+  kiel-parksensors:
+    image: vbb-rest-2-ngsi-node
+    hostname: vbb2ngsi-node
+    container_name: vbb2ngsi-node
+    build: ./app
+    env_file:
+      - .env
+    networks:
+      - default
+    volumes:
+      - ./app:/home/nodejs/vbb-rest-2-ngsi
+      - node_modules:/home/nodejs/vbb-rest-2-ngsi/node_modules
+
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 172.13.37.0/24
+
+volumes:
+  node_modules:

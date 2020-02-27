@@ -1,0 +1,66 @@
+#!/bin/bash
+#
+#  Command Line Interface to start the vbb-rest-2-ngsi application service
+#
+#  For this app the commands are merely a convenience script to run docker-compose
+#
+
+set -e
+
+if (( $# != 1 )); then
+	echo "Illegal number of parameters"
+	echo "usage: services [create|start|stop]"
+	exit 1
+fi
+
+stoppingContainers () {
+	echo "Stopping containers"
+	docker-compose --log-level ERROR -p vbb2ngsi down --remove-orphans
+}
+
+displayServices () {
+	echo ""
+	docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+	echo ""
+}
+
+command="$1"
+case "${command}" in
+	"help")
+		echo "usage: services [create|start|stop]"
+		;;
+	"start")
+		stoppingContainers
+		echo -e "Starting 7 containers:"
+		echo -e "a \033[1;34mOrion v2\033[0m"
+		#echo -e "a \033[1;34mOrion LD\033[0m"
+		echo -e "two \033[1;30mMongoDB\033[0m databases"
+		echo -e "a \033[1;93mQuantumLeap API\033[0m"
+		echo -e "a \033[1;90mCrate-DB\033[0m"
+		echo -e "and a \033[1;95mvbb-rest-2-ngsi\033[0m Node.Js app"
+		echo -e "- the \033[1;34mOrion\033[0ms are the context brokers"
+		echo ""
+		docker-compose --log-level ERROR -p vbb2ngsi up -d --remove-orphans
+		displayServices
+		;;
+	"stop")
+		stoppingContainers
+		;;
+	"create")
+		echo "Obtaining Mongo DB v3.6 Image"
+		docker pull mongo:3.6
+		echo "Obtaining Orion v2.3.0 Image"
+		docker pull fiware/orion:2.3.0
+		#echo "Obtaining Latest Orion LD Image"
+		#docker pull fiware/orion-ld
+		echo "Obtaining QuantumLeap v0.7.5 Image"
+		docker pull smartsdk/quantumleap:0.7.5
+		echo "Obtaining Crate-DB v3.3.5 Image"
+		docker pull crate:3.3.5
+		;;
+	*)
+		echo "Command not Found."
+		echo "usage: services [create|start|stop]"
+		exit 127;
+		;;
+esac

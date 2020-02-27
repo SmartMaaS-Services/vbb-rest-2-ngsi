@@ -1,0 +1,129 @@
+version: "3.5"
+services:
+  # Context broker (v2)
+  orion-v2:
+    image: fiware/orion:2.3.0
+    hostname: orion-v2
+    container_name: vbb2ngsi-orion-v2
+    depends_on:
+      - mongo-db-v2
+    networks:
+      - default
+    ports:
+      - "1026:1026"
+    command: -dbhost mongo-db-v2 -logLevel WARN -noCache
+    healthcheck:
+      test: curl --fail -s http://orion-v2:1026/version || exit 1
+    logging:
+      driver: none
+
+  # Context broker (LD)
+  #orion-ld:
+  #  image: fiware/orion-ld
+  #  hostname: orion-ld
+  #  container_name: vbb2ngsi-orion-ld
+  #  depends_on:
+  #    - mongo-db-ld
+  #  networks:
+  #    - default
+  #  ports:
+  #    - "1027:1026"
+  #  command: -dbhost mongo-db-ld -logLevel WARN
+  #  healthcheck:
+  #    test: curl --fail -s http://orion-ld:1026/version || exit 1
+  #  logging:
+  #    driver: none
+
+  # Database (v2)
+  mongo-db-v2:
+    image: mongo:3.6
+    hostname: mongo-db-v2
+    container_name: vbb2ngsi-db-mongo-v2
+    ports:
+      - "27017:27017"
+    networks:
+      - default
+    command: --bind_ip_all
+    ulimits:
+      memlock: -1
+    volumes:
+      - mongo-db-v2:/data
+    logging:
+      driver: none
+
+  # Database (LD)
+  #mongo-db-ld:
+  #  image: mongo:3.6
+  #  hostname: mongo-db-ld
+  #  container_name: vbb2ngsi-db-mongo-ld
+  #  ports:
+  #    - "27018:27017"
+  #  networks:
+  #    - default
+  #  command: --bind_ip_all
+  #  ulimits:
+  #    memlock: -1
+  #  volumes:
+  #    - mongo-db-ld:/data
+  #  logging:
+  #    driver: none
+
+  # Quantum Leap is persisting Short Term History to Crate-DB
+  quantumleap:
+    image: smartsdk/quantumleap:0.7.5
+    hostname: quantumleap
+    container_name: vbb2ngsi-quantumleap
+    networks:
+      - default
+    ports:
+      - "8668:8668"
+    depends_on:
+      - crate-db
+    environment:
+      - CRATE_HOST=crate-db
+    healthcheck:
+      test: curl --fail -s http://quantumleap:8668/v2/version || exit 1
+    logging:
+      driver: json-file
+
+  # Crate-DB for holding time-series / history data
+  crate-db:
+    image: crate:3.3.5
+    hostname: crate-db
+    container_name: vbb2ngsi-db-crate
+    networks:
+      - default
+    ports:
+      # Admin UI
+      - "4200:4200"
+      # Transport protocol
+      - "4300:4300"
+    command: crate -Clicense.enterprise=false -Cauth.host_based.enabled=false -Ccluster.name=democluster -Chttp.cors.enabled=true -Chttp.cors.allow-origin="*"
+    volumes:
+      - crate-db:/data
+
+  # VBB-REST-2-NGSI Node.js App
+  kiel-parksensors:
+    image: vbb-rest-2-ngsi-node
+    hostname: vbb2ngsi-node
+    container_name: vbb2ngsi-node
+    build: ./app
+    env_file:
+      - .env
+    networks:
+      - default
+    volumes:
+      - ./app:/home/nodejs/vbb-rest-2-ngsi
+      - node_modules:/home/nodejs/vbb-rest-2-ngsi/node_modules
+
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 172.13.37.0/24
+
+volumes:
+  mongo-db-v2: 
+  mongo-db-ld:
+  crate-db:
+  node_modules:

@@ -1,0 +1,38 @@
+{
+  "name": "vbb-rest-2-ngsi",
+  "version": "1.0.0",
+  "description": "Node.js application that uses the vbb-rest API to read public transport data of the Verkehrsverbund Berlin-Brandenburg (VBB) and transform it from FTPF into a NGSI-compliant data format for subsequent storage in FIWARE NGSI context brokers. Applied FIWARE data models implement the General Transit Feed Specification (GTFS).",
+  "main": "index.js",
+  "dependencies": {
+    "axios": "^0.19.2",
+    "dotenv": "^8.2.0",
+    "pino": "^5.16.0",
+    "pino-pretty": "^3.6.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SmartMaaS-Services/vbb-rest-2-ngsi.git"
+  },
+  "keywords": [
+    "vbb",
+    "rest",
+    "public",
+    "transport",
+    "ftpf",
+    "ngsi",
+    "fiware",
+    "context",
+    "broker",
+    "gtfs"
+  ],
+  "author": "Michael Schulz <michael.schulz@fiware.org>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/SmartMaaS-Services/vbb-rest-2-ngsi/issues"
+  },
+  "homepage": "https://github.com/SmartMaaS-Services/vbb-rest-2-ngsi#readme"
+}
