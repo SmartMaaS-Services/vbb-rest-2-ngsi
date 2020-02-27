@@ -8,16 +8,56 @@ Node.js application that uses the [vbb-rest](https://github.com/derhuerst/vbb-re
 
 ## Content
 
--   [NGSI data models](#ngsi-data-models)
 -   [Current limitations](#current-limitations)
 -   [Prerequisites](#prerequisites)
 -   [Operation modes](#operation-modes)
 -   [Configuration](#configuration)
 -   [Starting Docker containers](#starting-docker-containers)
+-   [NGSI data models](#ngsi-data-models)
 -   [Reading data from context brokers](#reading-data-from-context-brokers)
 -   [History data](#history-data)
 -   [Troubleshooting](#troubleshooting)
 -   [License](#license)
+
+## Current limitations ## 
+
+* Currently only storage in a FIWARE NGSI v2 Context Broker is supported
+
+* The NGSI data model types GtfsService and GtfsTrip are not considered yet. Although with regard to the relationship model these types should be harmonised, it's due to the implementation of the REST API that some of the information is not available or suitable for transformation into context data.
+  
+  * a GtfsService should reference a GtfsAgency but differently defined service times for routes are not known or cannot be queried via API
+  
+  * a GtfsTrip may reference a GtfsShape, should reference a GtfsService and a GtfsRoute but a trip ID always includes date of the day and is regularly generated. Therefore in this form not suitable for transformation into an NGSI entity with fixed ID.
+
+* Instead of querying all stations (~ 13000) from the vbb-rest API only a small subset of 10 selected stations are processed for now. The code still needs some throttling mechanism to handle the actual amount of API data in parallel.<br>
+Furthermore just one possible journey of some selected connections (station A -> station B) are picked for now. It is planned to include all journeys at some point.
+
+
+## Prerequisites ##
+
+[Docker](https://www.docker.com/) and [Docker Compose](https://github.com/docker/compose) must be installed on your system in order to run the services defined in the multi-container file.
+
+
+## Operation modes ##
+
+The project offers two different compose files. The first variant starts the Node.js script, the context broker and components for persisting data. In this mode (client-server mode), the retrieved public transport data is stored in the context broker of the local Docker container and, if configured, persisted in the local CrateDB instance.<br>
+
+The second variant comprises a single service for the Node.js script. It acts as a client to a context broker running elsewhere (client mode).
+
+
+## Configuration ##
+
+There is a configuration file `.env` containing environment variables used by the Node.js script. Some of the variables values have to be modified prior to initial startup, as the script uses those variables for connection management and data processing.<br>
+
+A list with a summary of currently supported variables will follow...
+
+
+## Starting Docker containers ##
+
+Depending on what operation mode is preferred, pull/create the images and start containers by running `./services create && ./services start` (client-server mode) or simply `./services-app-only start` (client mode) from the project root folder.<br>
+To stop the containers run `./services[-app-only] stop`.<br>
+If you encounter problems executing the service scripts, add the missing permission with `chmod +x services*`.
+
 
 ## NGSI data models ##
 
@@ -88,46 +128,6 @@ Entites of the following types are sent to the context brokers:
 <i>Notes:</i> 
 * `<ENTITY_ID_SUFFIX>` is an optional ID suffix that will be appended to each entity ID (preceded by a colon '`:`') if configured in the [configuration](#configuration).
 * The same rules apply to NGSI LD entities. The only difference: `urn:ngsi-ld:` is prepended to the entity ID, e.g. <p><i>`urn:ngsi-ld:`GtfsStop:000008012713:XY`</i></p>
-
-
-## Current limitations ## 
-
-* Currently only storage in a FIWARE NGSI v2 Context Broker is supported
-
-* The NGSI data model types GtfsService and GtfsTrip are not considered yet. Although with regard to the relationship model these types should be harmonised, it's due to the implementation of the REST API that some of the information is not available or suitable for transformation into context data.
-  
-  * a GtfsService should reference a GtfsAgency but differently defined service times for routes are not known or cannot be queried via API
-  
-  * a GtfsTrip may reference a GtfsShape, should reference a GtfsService and a GtfsRoute but a trip ID always includes date of the day and is regularly generated. Therefore in this form not suitable for transformation into an NGSI entity with fixed ID.
-
-* Instead of querying all stations (~ 13000) from the vbb-rest API only a small subset of 10 selected stations are processed for now. The code still needs some throttling mechanism to handle the actual amount of API data in parallel.<br>
-Furthermore just one possible journey of some selected connections (station A -> station B) are picked for now. It is planned to include all journeys at some point.
-
-
-## Prerequisites ##
-
-[Docker](https://www.docker.com/) and [Docker Compose](https://github.com/docker/compose) must be installed on your system in order to run the services defined in the multi-container file.
-
-
-## Operation modes ##
-
-The project offers two different compose files. The first variant starts the Node.js script, the context broker and components for persisting data. In this mode (client-server mode), the retrieved public transport data is stored in the context broker of the local Docker container and, if configured, persisted in the local CrateDB instance.<br>
-
-The second variant comprises a single service for the Node.js script. It acts as a client to a context broker running elsewhere (client mode).
-
-
-## Configuration ##
-
-There is a configuration file `.env` containing environment variables used by the Node.js script. Some of the variables values have to be modified prior to initial startup, as the script uses those variables for connection management and data processing.<br>
-
-A list with a summary of currently supported variables will follow...
-
-
-## Starting Docker containers ##
-
-Depending on what operation mode is preferred, pull/create the images and start containers by running `./services create && ./services start` (client-server mode) or simply `./services-app-only start` (client mode) from the project root folder.<br>
-To stop the containers run `./services[-app-only] stop`.<br>
-If you encounter problems executing the service scripts, add the missing permission with `chmod +x services*`.
 
 
 ## Reading data from context brokers ##
