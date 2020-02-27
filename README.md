@@ -30,6 +30,65 @@ Entites of the following types are sent to the context brokers:
 * GtfsRoute
 * GtfsShape
 
+### Entity IDs use the following format: ###
+<table>
+  <tbody>
+    <tr>
+      <th>Entity Type</th>
+      <th>NGSI</th>
+    </tr>
+    <tr>
+      <td>
+        GtfsStop
+      </td>
+      <td>
+        <p><code>GtfsStop:&lt;STOP_ID&gt;[:&lt;ENTITY_ID_SUFFIX&gt;]</code></p>
+        <p>e.g. <i>GtfsStop:000008012713:XY</i></p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        GtfsStation
+      </td>
+      <td>
+        <p><code>GtfsStation:&lt;STATION_ID&gt;[:&lt;ENTITY_ID_SUFFIX&gt;]</code></p>
+        <p>e.g. <i>GtfsStation:900000245025:XY</i></p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        GtfsAgency
+      </td>
+      <td>
+        <p><code>GtfsAgency:&lt;AGENCY_ID&gt;[:&lt;ENTITY_ID_SUFFIX&gt;]</code></p>
+        <p>e.g. <i>GtfsAgency:berliner-verkehrsbetriebe:XY</i></p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        GtfsRoute
+      </td>
+      <td>
+        <p><code>GtfsRoute:&lt;ORIGIN_STATION_ID&gt;-&lt;DESTINATION_STATION_ID&gt;[:&lt;ENTITY_ID_SUFFIX&gt;]</code></p>
+        <p>e.g. <i>GtfsRoute:900000044201-900000009202:XY</i></p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        GtfsShape
+      </td>
+      <td>
+        <p><code>GtfsShape:&lt;ORIGIN_STATION_ID&gt;-&lt;DESTINATION_STATION_ID&gt;[:&lt;ENTITY_ID_SUFFIX&gt;]</code></p>
+        <p>e.g. <i>GtfsShape:900000044201-900000009202:XY</i></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<i>Notes:</i> 
+* `<ENTITY_ID_SUFFIX>` is an optional ID suffix that will be appended to each entity ID (preceded by a colon '`:`') if configured in the [configuration](#configuration).
+* The same rules apply to NGSI LD entities. The only difference: `urn:ngsi-ld:` is prepended to the entity ID, e.g. <p><i>`urn:ngsi-ld:`GtfsStop:000008012713:XY`</i></p>
+
 
 ## Current limitations ## 
 
