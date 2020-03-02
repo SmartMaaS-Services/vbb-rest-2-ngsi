@@ -18,21 +18,21 @@ services:
       driver: none
 
   # Context broker (LD)
-  #orion-ld:
-  #  image: fiware/orion-ld
-  #  hostname: orion-ld
-  #  container_name: vbb2ngsi-orion-ld
-  #  depends_on:
-  #    - mongo-db-ld
-  #  networks:
-  #    - default
-  #  ports:
-  #    - "1027:1026"
-  #  command: -dbhost mongo-db-ld -logLevel WARN
-  #  healthcheck:
-  #    test: curl --fail -s http://orion-ld:1026/version || exit 1
-  #  logging:
-  #    driver: none
+  orion-ld:
+    image: fiware/orion-ld
+    hostname: orion-ld
+    container_name: vbb2ngsi-orion-ld
+    depends_on:
+      - mongo-db-ld
+    networks:
+      - default
+    ports:
+      - "1027:1026"
+    command: -dbhost mongo-db-ld -logLevel WARN
+    healthcheck:
+      test: curl --fail -s http://orion-ld:1026/version || exit 1
+    logging:
+      driver: none
 
   # Database (v2)
   mongo-db-v2:
@@ -52,21 +52,21 @@ services:
       driver: none
 
   # Database (LD)
-  #mongo-db-ld:
-  #  image: mongo:3.6
-  #  hostname: mongo-db-ld
-  #  container_name: vbb2ngsi-db-mongo-ld
-  #  ports:
-  #    - "27018:27017"
-  #  networks:
-  #    - default
-  #  command: --bind_ip_all
-  #  ulimits:
-  #    memlock: -1
-  #  volumes:
-  #    - mongo-db-ld:/data
-  #  logging:
-  #    driver: none
+  mongo-db-ld:
+    image: mongo:3.6
+    hostname: mongo-db-ld
+    container_name: vbb2ngsi-db-mongo-ld
+    ports:
+      - "27018:27017"
+    networks:
+      - default
+    command: --bind_ip_all
+    ulimits:
+      memlock: -1
+    volumes:
+      - mongo-db-ld:/data
+    logging:
+      driver: none
 
   # Quantum Leap is persisting Short Term History to Crate-DB
   quantumleap:

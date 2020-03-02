@@ -103,24 +103,31 @@ const getExistingEntities = (brokerUrl, params) => {
     return REST.executeRequest('GET', `${brokerUrl}/entities${paramsString}`, headers, null);
 };
 
-const patchEntities = (brokerUrl, entities) => {
+const updateEntities = (brokerUrl, entities) => {
     if (!Array.isArray(entities) || (Array.isArray(entities) && !entities.length)) {
         return;
     }
 
     const headers = setRequestHeaders({'Content-Type': 'application/json'});
-    return Promise.all(entities.map(entity => {
-        if (entity && entity.id) {
-            const requestUrl = `${brokerUrl}/entities/${entity.id}/attrs`;
-            // remove id and type property from entity object because only attributes are allowed in the payload (-> patches / overwrites all entity attributes)
-            delete entity.id;
-            delete entity.type;
-            return REST.executeRequest('PATCH', requestUrl, headers, JSON.stringify(entity));
-        }
-    }));
+    const batchBody = JSON.stringify({'actionType': 'append', 'entities': entities});
+    const batchBodySize = Buffer.byteLength(batchBody, 'utf8');
+    // if body size would exceed context broker's default payload size limit of an incoming request [1048576 bytes (1 MiB)], split batch operation into several requests
+    if (batchBodySize > 1048576) {
+        return Promise.all(entities.map(entity => {
+            if (entity && entity.id) {
+                const requestUrl = `${brokerUrl}/entities/${entity.id}/attrs`;
+                // remove id and type property from entity object because only attributes are allowed in the payload (update or append entity attributes)
+                delete entity.id;
+                delete entity.type;
+                return REST.executeRequest('POST', requestUrl, headers, JSON.stringify(entity));
+            }
+        }));
+    } else {
+        return REST.executeRequest('POST', `${brokerUrl}/op/update`, headers, batchBody);
+    }
 };
 
-const postEntities = (brokerUrl, entities) => {
+const createEntities = (brokerUrl, entities) => {
     if (!Array.isArray(entities) || (Array.isArray(entities) && !entities.length)) {
         return;
     }
@@ -128,7 +135,7 @@ const postEntities = (brokerUrl, entities) => {
     const headers = setRequestHeaders({'Content-Type': 'application/json'});
     const batchBody = JSON.stringify({'actionType': 'append_strict', 'entities': entities});
     const batchBodySize = Buffer.byteLength(batchBody, 'utf8');
-    // if body size would exceed context broker's default payload size limit of an incoming request [1048576 bytes (1 MiB)], split batch operation into several POST requests
+    // if body size would exceed context broker's default payload size limit of an incoming request [1048576 bytes (1 MiB)], split batch operation into several requests
     if (batchBodySize > 1048576) {
         return Promise.all(entities.map(entity => REST.executeRequest('POST', `${brokerUrl}/entities`, headers, JSON.stringify(entity))));
     } else {
@@ -163,19 +170,19 @@ const createOrUpdateEntities = async (brokerUrl, entities) => {
             // IDs of entities that already exist in NGSI v2 broker
             const existingIds = existingEntitiesResponse.data.map(entity => entity.id);
             // entities that already exist in NGSI v2 broker and need to be updated
-            const entitiesToPatch = [];
-            // entities that do not exist in NGSI v2 broker and need to be posted
-            const entitiesToPost = [];
+            const entitiesToUpdate = [];
+            // entities that do not exist in NGSI v2 broker and need to be created
+            const entitiesToCreate = [];
             for (const entity of entities) {
                 // entity already exists in NGSI v2 broker
                 if (existingIds.includes(entity.id)) {
-                    entitiesToPatch.push(entity);
+                    entitiesToUpdate.push(entity);
                 } else {
-                    entitiesToPost.push(entity);
+                    entitiesToCreate.push(entity);
                 }
             }
 
-            if (entitiesToPatch.length || entitiesToPost.length) {
+            if (entitiesToUpdate.length || entitiesToCreate.length) {
                 // if historic data persistence is enabled and notification base URL is set, subscribe for value changes of entity attributes in the context broker before adding / updating entities
                 if (process.env.ENABLE_HISTORIC_DATA_STORAGE && process.env.ENABLE_HISTORIC_DATA_STORAGE === 'true' && process.env.QL_V2_NOTIFICATION_BASE_URL) {
                     //TODO do subsequent queries if total count of subscriptions in the broker (as denoted by 'Fiware-Total-Count' response header) is higher 
@@ -199,22 +206,22 @@ const createOrUpdateEntities = async (brokerUrl, entities) => {
                     }
                 }
 
-                let patchingEntities = null, postingEntities = null;
-                if (entitiesToPatch.length) {
-                    logger.info(`UPDATING ${entitiesToPatch.length} EXISTING entities in NGSI v2 broker...`);
-                    //logger.info(JSON.stringify(entitiesToPatch));
+                let updatingEntities = null, creatingEntities = null;
+                if (entitiesToUpdate.length) {
+                    logger.info(`UPDATING ${entitiesToUpdate.length} EXISTING entities in NGSI v2 broker...`);
+                    //logger.info(JSON.stringify(entitiesToUpdate));
                     // update existing entity objects in context broker
-                    patchingEntities = patchEntities(brokerUrl, entitiesToPatch);
+                    updatingEntities = updateEntities(brokerUrl, entitiesToUpdate);
                 }
-                if (entitiesToPost.length) {
-                    logger.info(`ADDING ${entitiesToPost.length} NEW entities to NGSI v2 broker...`);
-                    //logger.info(JSON.stringify(entitiesToPost));
-                    // add new entity objects to context broker
-                    postingEntities = postEntities(brokerUrl, entitiesToPost);
+                if (entitiesToCreate.length) {
+                    logger.info(`CREATING ${entitiesToCreate.length} NEW entities in NGSI v2 broker...`);
+                    //logger.info(JSON.stringify(entitiesToCreate));
+                    // create new entity objects in context broker
+                    creatingEntities = createEntities(brokerUrl, entitiesToCreate);
                 }
 
-                await patchingEntities;
-                await postingEntities;
+                await updatingEntities;
+                await creatingEntities;
             }
         } else {
             logger.error(`createOrUpdateEntities: could not query existing entities of type '${entityType}' in NGSI v2 broker`);

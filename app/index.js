@@ -12,14 +12,16 @@ const REST = require('./lib/helpers/rest.js');
 const VBB_REST = require('./lib/helpers/vbb_rest.js');
 const GTFS = require('./lib/helpers/gtfs.js');
 const NGSI_V2 = require('./lib/ngsi_v2/helper.js');
+const NGSI_LD = require('./lib/ngsi_ld/helper.js');
 const ContextBrokerV2 = require('./lib/ngsi_v2/context_broker.js');
+const ContextBrokerLD = require('./lib/ngsi_ld/context_broker.js');
 
 // read environment variables from .env file in current workdir into process.env
 dotenv.config();
 
 
 // context brokers (theoretically in future we could supply context data to more than one broker of a type)
-const BROKERS = { v2: [REST.sanitizeUrl(process.env.BROKER_V2_BASE_URL)], ld: [/*REST.sanitizeUrl(process.env.BROKER_LD_BASE_URL)*/] };
+const BROKERS = { v2: [REST.sanitizeUrl(process.env.BROKER_V2_BASE_URL)], ld: [REST.sanitizeUrl(process.env.BROKER_LD_BASE_URL)] };
 
 // give other required services some time (20 seconds) to get started before trying to connect to them
 setTimeout(() => {
@@ -35,7 +37,7 @@ setTimeout(() => {
         }
 
         logger.info(`initiating ${type} transformation into NGSI...`);
-        let entityV2Objects = []/*, entityLDObjects = []*/;
+        let entityV2Objects = [], entityLDObjects = [];
 
         // we have a list of NGSI v2 context brokers -> transform objects to compatible NGSI v2 entity objects
         if (BROKERS.v2.length) {
@@ -43,10 +45,10 @@ setTimeout(() => {
         }
         // we have a list of NGSI LD context brokers -> transform objects to compatible NGSI LD entity objects
         if (BROKERS.ld.length) {
-            //entityLDObjects = ...
+            entityLDObjects = objArray.map(obj => NGSI_LD.transformIntoNGSI(obj, type));
         }
 
-        return { v2: entityV2Objects/*, ld: entityLDObjects*/ };
+        return { v2: entityV2Objects, ld: entityLDObjects };
     }
 
     async function queryVBBStations() {
@@ -199,20 +201,20 @@ setTimeout(() => {
             //--> start tasks simultaneously
             // - create or update GtfsAgency/GtfsRoute/GtfsShape entities in NGSI Context Broker
             const createUpdateAgenciesTasksV2 = BROKERS.v2.map(v2Url => ContextBrokerV2.createOrUpdateEntities(v2Url, transformedNGSIagencies.v2));
-            //const createUpdateAgenciesTasksLD = BROKERS.ld.map(ldUrl => ContextBrokerLD.createOrUpdateEntities(ldUrl, transformedNGSIagencies.ld));
+            const createUpdateAgenciesTasksLD = BROKERS.ld.map(ldUrl => ContextBrokerLD.createOrUpdateEntities(ldUrl, transformedNGSIagencies.ld));
             const createUpdateRoutesTasksV2 = BROKERS.v2.map(v2Url => ContextBrokerV2.createOrUpdateEntities(v2Url, transformedNGSIroutes.v2));
-            //const createUpdateRoutesTasksLD = BROKERS.ld.map(ldUrl => ContextBrokerLD.createOrUpdateEntities(ldUrl, transformedNGSIroutes.ld));
+            const createUpdateRoutesTasksLD = BROKERS.ld.map(ldUrl => ContextBrokerLD.createOrUpdateEntities(ldUrl, transformedNGSIroutes.ld));
             const createUpdateShapesTasksV2 = BROKERS.v2.map(v2Url => ContextBrokerV2.createOrUpdateEntities(v2Url, transformedNGSIshapes.v2));
-            //const createUpdateShapesTasksLD = BROKERS.ld.map(ldUrl => ContextBrokerLD.createOrUpdateEntities(ldUrl, transformedNGSIshapes.ld));
+            const createUpdateShapesTasksLD = BROKERS.ld.map(ldUrl => ContextBrokerLD.createOrUpdateEntities(ldUrl, transformedNGSIshapes.ld));
             //<--
 
             //--> wait for tasks to finish
             for (const taskV2 of createUpdateAgenciesTasksV2) await taskV2;
-            //for (const taskLD of createUpdateAgenciesTasksLD) await taskLD;
+            for (const taskLD of createUpdateAgenciesTasksLD) await taskLD;
             for (const taskV2 of createUpdateRoutesTasksV2) await taskV2;
-            //for (const taskLD of createUpdateRoutesTasksLD) await taskLD;
+            for (const taskLD of createUpdateRoutesTasksLD) await taskLD;
             for (const taskV2 of createUpdateShapesTasksV2) await taskV2;
-            //for (const taskLD of createUpdateShapesTasksLD) await taskLD;
+            for (const taskLD of createUpdateShapesTasksLD) await taskLD;
             //<--
         } catch(error) {
             logger.error('processJourneys: ', error);
@@ -236,18 +238,18 @@ setTimeout(() => {
             //--> start tasks simultaneously
             // - create or update GtfsStation/GtfsStop entities in NGSI Context Broker
             const createUpdateStationsTasksV2 = BROKERS.v2.map(v2Url => ContextBrokerV2.createOrUpdateEntities(v2Url, transformedNGSIstations.v2));
-            //const createUpdateStationsTasksLD = BROKERS.ld.map(ldUrl => ContextBrokerLD.createOrUpdateEntities(ldUrl, transformedNGSIstations.ld));
+            const createUpdateStationsTasksLD = BROKERS.ld.map(ldUrl => ContextBrokerLD.createOrUpdateEntities(ldUrl, transformedNGSIstations.ld));
             const createUpdateStopsTasksV2 = BROKERS.v2.map(v2Url => ContextBrokerV2.createOrUpdateEntities(v2Url, transformedNGSIstops.v2));
-            //const createUpdateStopsTasksLD = BROKERS.ld.map(ldUrl => ContextBrokerLD.createOrUpdateEntities(ldUrl, transformedNGSIstops.ld));
+            const createUpdateStopsTasksLD = BROKERS.ld.map(ldUrl => ContextBrokerLD.createOrUpdateEntities(ldUrl, transformedNGSIstops.ld));
             // - query journeys (TODO query all possible journeys of all possible connections (based on available stations): just take some selected journeys for now)
             const queryingJourneys = queryVBBJourneys(/*stations*/);
             //<--
 
             //--> wait for tasks to finish
             for (const taskV2 of createUpdateStationsTasksV2) await taskV2;
-            //for (const taskLD of createUpdateStationsTasksLD) await taskLD;
+            for (const taskLD of createUpdateStationsTasksLD) await taskLD;
             for (const taskV2 of createUpdateStopsTasksV2) await taskV2;
-            //for (const taskLD of createUpdateStopsTasksLD) await taskLD;
+            for (const taskLD of createUpdateStopsTasksLD) await taskLD;
             //<--
 
             // - wait for the journey query to finish and process journeys 

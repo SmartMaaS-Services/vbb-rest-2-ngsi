@@ -82,6 +82,7 @@ const executeRequest = (method, url, headers, body) => {
             resolve(response);
         })
         .catch(error => {
+            logger.error(`executeRequest - failed request: ${requestConfig.method} '${requestConfig.url}'`);
             logger.error(error);
             //reject(error);
             resolve(error);

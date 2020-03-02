@@ -4,7 +4,7 @@
 [![SOF support badge](https://nexus.lab.fiware.org/repository/raw/public/badges/stackoverflow/orion.svg)](http://stackoverflow.com/questions/tagged/fiware-orion)
 [![NGSI v2](https://nexus.lab.fiware.org/repository/raw/public/badges/specifications/ngsiv2.svg)](http://fiware-ges.github.io/orion/api/v2/stable/)
 
-Node.js application that uses the [vbb-rest](https://github.com/derhuerst/vbb-rest) API to read public transport data of the Verkehrsverbund Berlin-Brandenburg (VBB) and transform it from [FTPF](https://github.com/public-transport/friendly-public-transport-format) into a NGSI-compliant data format for subsequent storage in FIWARE NGSI Context Brokers. Applied [FIWARE data models](https://fiware-datamodels.readthedocs.io/en/latest/UrbanMobility/doc/introduction/index.html) implement the [General Transit Feed Specification (GTFS)](https://developers.google.com/transit/gtfs/reference).
+Node.js application that uses the [vbb-rest](https://github.com/derhuerst/vbb-rest) API to read public transport data of the Verkehrsverbund Berlin-Brandenburg (VBB) and transform it from [FTPF](https://github.com/public-transport/friendly-public-transport-format) into a NGSI-compliant data format (NGSI v2 and NGSI-LD) for subsequent storage in FIWARE NGSI Context Brokers. Applied [FIWARE data models](https://fiware-datamodels.readthedocs.io/en/latest/UrbanMobility/doc/introduction/index.html) implement the [General Transit Feed Specification (GTFS)](https://developers.google.com/transit/gtfs/reference).
 
 ## Content
 
@@ -21,16 +21,16 @@ Node.js application that uses the [vbb-rest](https://github.com/derhuerst/vbb-re
 
 ## Current limitations ## 
 
-* Currently only storage in a FIWARE NGSI v2 Context Broker is supported
+* `GtfsShape` entites in the NGSI LD format can't currently be created because of some server-side processing issues with used geometry type `LineString`.
 
-* The NGSI data model types GtfsService and GtfsTrip are not considered yet. Although with regard to the relationship model these types should be harmonised, it's due to the implementation of the REST API that some of the information is not available or suitable for transformation into context data.
+* The NGSI data model types `GtfsService` and `GtfsTrip` are not considered yet. Although with regard to the relationship model these types should be harmonised, it's due to the implementation of the REST API that some information is not available or suitable for transformation into context data.
   
-  * a GtfsService should reference a GtfsAgency but differently defined service times for routes are not known or cannot be queried via API
+  * A `GtfsService` should reference a `GtfsAgency` but various defined service times for routes are not known or cannot be queried via API.
   
-  * a GtfsTrip may reference a GtfsShape, should reference a GtfsService and a GtfsRoute but a trip ID always includes date of the day and is regularly generated. Therefore in this form not suitable for transformation into an NGSI entity with fixed ID.
+  * A `GtfsTrip` may reference a `GtfsShape`, should reference a `GtfsService` and a `GtfsRoute`, but a trip ID always includes date of the day and is often regenerated. Therefore its form is not suitable for transformation into a NGSI entity with fixed ID.
 
 * Instead of querying all stations (~ 13000) from the vbb-rest API only a small subset of 10 selected stations are processed for now. The code still needs some throttling mechanism to handle the actual amount of API data in parallel.<br>
-Furthermore just one possible journey of some selected connections (station A -> station B) are picked for now. It is planned to include all journeys at some point.
+Furthermore just one possible journey of some selected connections (station A -> station B) are picked. It is planned to include all journeys at some point.
 
 
 ## Prerequisites ##
@@ -49,7 +49,7 @@ The second variant comprises a single service for the Node.js script. It acts as
 
 There is a configuration file `.env` containing environment variables used by the Node.js script. Some of the variables values have to be modified prior to initial startup, as the script uses those variables for connection management and data processing.<br>
 
-A list with a summary of currently supported variables will follow...
+A list with a summary of currently supported variables will follow. In the meantime please check the content of the `.env` file.
 
 
 ## Starting Docker containers ##
@@ -64,22 +64,22 @@ If you encounter problems executing the service scripts, add the missing permiss
 Read data from the vbb-rest API is harmonised for transformation into applicable FIWARE NGSI data models of the domain Urban Mobility.  
 Entites of the following types are sent to the context brokers:
 
-* GtfsStop
-* GtfsStation
-* GtfsAgency
-* GtfsRoute
-* GtfsShape
+* `GtfsStop` - A stop where vehicles pick up or drop off riders
+* `GtfsStation` - A physical structure or area that contains one or more stops
+* `GtfsAgency` - 	Transit agency (transportation operator) that offers services at particular times
+* `GtfsRoute` - A (transit) route is a group of trips (sequences of two or more stops that occur during a specific time period) that are displayed to riders as a single service.
+* `GtfsShape` - Describes the path that a vehicle travels along a route alignment (consists of a sequence of points)
 
 ### Entity IDs use the following format: ###
 <table>
   <tbody>
     <tr>
       <th>Entity Type</th>
-      <th>NGSI</th>
+      <th>Entity ID format</th>
     </tr>
     <tr>
       <td>
-        GtfsStop
+        <code>GtfsStop</code>
       </td>
       <td>
         <p><code>GtfsStop:&lt;STOP_ID&gt;[:&lt;ENTITY_ID_SUFFIX&gt;]</code></p>
@@ -88,7 +88,7 @@ Entites of the following types are sent to the context brokers:
     </tr>
     <tr>
       <td>
-        GtfsStation
+        <code>GtfsStation</code>
       </td>
       <td>
         <p><code>GtfsStation:&lt;STATION_ID&gt;[:&lt;ENTITY_ID_SUFFIX&gt;]</code></p>
@@ -97,7 +97,7 @@ Entites of the following types are sent to the context brokers:
     </tr>
     <tr>
       <td>
-        GtfsAgency
+        <code>GtfsAgency</code>
       </td>
       <td>
         <p><code>GtfsAgency:&lt;AGENCY_ID&gt;[:&lt;ENTITY_ID_SUFFIX&gt;]</code></p>
@@ -106,7 +106,7 @@ Entites of the following types are sent to the context brokers:
     </tr>
     <tr>
       <td>
-        GtfsRoute
+        <code>GtfsRoute</code>
       </td>
       <td>
         <p><code>GtfsRoute:&lt;ORIGIN_STATION_ID&gt;-&lt;DESTINATION_STATION_ID&gt;[:&lt;ENTITY_ID_SUFFIX&gt;]</code></p>
@@ -115,7 +115,7 @@ Entites of the following types are sent to the context brokers:
     </tr>
     <tr>
       <td>
-        GtfsShape
+        <code>GtfsShape</code>
       </td>
       <td>
         <p><code>GtfsShape:&lt;ORIGIN_STATION_ID&gt;-&lt;DESTINATION_STATION_ID&gt;[:&lt;ENTITY_ID_SUFFIX&gt;]</code></p>
@@ -137,14 +137,14 @@ You can GET a list of all entities using the following cURL commands. Don't forg
 
 
 ### Orion v2 ###
-List all GtfsStation entities containing only the 'id' attribute:  
+List all `GtfsStation` entities containing only the 'id' attribute:  
 
 ``` bash
 curl -X GET '<DOCKER_HOST>:1026/v2/entities?type=GtfsStation&attrs=id&options=keyValues' \
   -H 'Accept: application/json'
 ```
   
-List all GtfsStation entities containing all attributes:  
+List all `GtfsStation` entities containing all attributes:  
 
 ``` bash
 curl -X GET '<DOCKER_HOST>:1026/v2/entities?type=GtfsStation&options=keyValues' \
