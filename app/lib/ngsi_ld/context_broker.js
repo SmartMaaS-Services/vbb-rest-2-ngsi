@@ -15,7 +15,7 @@ const REST = require('../helpers/rest.js');
 dotenv.config();
 
 
-// set headers of a request to the NGSI LD broker
+// set headers of a request to the NGSI-LD broker
 const setRequestHeaders = (headers) => {
     headers = headers || {};
 
@@ -86,7 +86,7 @@ const createEntities = (brokerUrl, entities) => {
     //}
 };
 
-// create or update given entitiy objects in NGSI LD broker
+// create or update given entitiy objects in NGSI-LD broker
 // NOTE: currently this function only accepts arrays of entities with the same type - different entity types in one array may lead to unexpected behavior
 const createOrUpdateEntities = async (brokerUrl, entities) => {
     if (!brokerUrl || (typeof brokerUrl !== 'string')) {
@@ -98,7 +98,7 @@ const createOrUpdateEntities = async (brokerUrl, entities) => {
         return;
     }
     if (!entities.length) {
-        logger.warn('createOrUpdateEntities: no NGSI LD entities given - nothing to create or update');
+        logger.warn('createOrUpdateEntities: no NGSI-LD entities given - nothing to create or update');
         return;
     }
 
@@ -116,14 +116,14 @@ const createOrUpdateEntities = async (brokerUrl, entities) => {
         const existingEntitiesResponse = await getExistingEntities(brokerUrl, params);
 
         if (existingEntitiesResponse && existingEntitiesResponse.data && Array.isArray(existingEntitiesResponse.data)) {
-            // IDs of entities that already exist in NGSI LD broker
+            // IDs of entities that already exist in NGSI-LD broker
             const existingIds = existingEntitiesResponse.data.map(entity => entity.id);
-            // entities that already exist in NGSI LD broker and need to be updated
+            // entities that already exist in NGSI-LD broker and need to be updated
             const entitiesToUpdate = [];
-            // entities that do not exist in NGSI LD broker and need to be created
+            // entities that do not exist in NGSI-LD broker and need to be created
             const entitiesToCreate = [];
             for (const entity of entities) {
-                // entity already exists in NGSI LD broker
+                // entity already exists in NGSI-LD broker
                 if (existingIds.includes(entity.id)) {
                     entitiesToUpdate.push(entity);
                 } else {
@@ -134,13 +134,13 @@ const createOrUpdateEntities = async (brokerUrl, entities) => {
             if (entitiesToUpdate.length || entitiesToCreate.length) {
                 let updatingEntities = null, creatingEntities = null;
                 if (entitiesToUpdate.length) {
-                    logger.info(`UPDATING ${entitiesToUpdate.length} EXISTING entities in NGSI LD broker...`);
+                    logger.info(`UPDATING ${entitiesToUpdate.length} EXISTING entities in NGSI-LD broker...`);
                     //logger.info(JSON.stringify(entitiesToUpdate));
                     // update existing entity objects in context broker
                     updatingEntities = updateEntities(brokerUrl, entitiesToUpdate);
                 }
                 if (entitiesToCreate.length) {
-                    logger.info(`CREATING ${entitiesToCreate.length} NEW entities in NGSI LD broker...`);
+                    logger.info(`CREATING ${entitiesToCreate.length} NEW entities in NGSI-LD broker...`);
                     //logger.info(JSON.stringify(entitiesToCreate));
                     // create new entity objects in context broker
                     creatingEntities = createEntities(brokerUrl, entitiesToCreate);
@@ -150,7 +150,7 @@ const createOrUpdateEntities = async (brokerUrl, entities) => {
                 await creatingEntities;
             }
         } else {
-            logger.error(`createOrUpdateEntities: could not query existing entities of type '${entityType}' in NGSI LD broker`);
+            logger.error(`createOrUpdateEntities: could not query existing entities of type '${entityType}' in NGSI-LD broker`);
         }
     } catch(error) {
         logger.error('createOrUpdateEntities: ' + error);

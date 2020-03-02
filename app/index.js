@@ -43,7 +43,7 @@ setTimeout(() => {
         if (BROKERS.v2.length) {
             entityV2Objects = objArray.map(obj => NGSI_V2.transformIntoNGSI(obj, type));
         }
-        // we have a list of NGSI LD context brokers -> transform objects to compatible NGSI LD entity objects
+        // we have a list of NGSI-LD context brokers -> transform objects to compatible NGSI-LD entity objects
         if (BROKERS.ld.length) {
             entityLDObjects = objArray.map(obj => NGSI_LD.transformIntoNGSI(obj, type));
         }

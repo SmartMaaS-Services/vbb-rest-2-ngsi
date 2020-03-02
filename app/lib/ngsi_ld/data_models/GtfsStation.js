@@ -1,5 +1,5 @@
 /**
- * GtfsStation NGSI LD data model
+ * GtfsStation NGSI-LD data model
  * 
  * Specification of source data format FTPF can be found here: https://github.com/public-transport/friendly-public-transport-format
  * NGSI harmonization based on FIWARE data models specified on https://fiware-datamodels.readthedocs.io/en/latest/UrbanMobility/doc/introduction/index.html
@@ -22,7 +22,7 @@ const NGSI = require('../../helpers/ngsi.js');
 dotenv.config();
 
 
-// create a NGSI LD compliant object from a FPTF station
+// create a NGSI-LD compliant object from a FPTF station
 const createFrom = (station) => {
     if (station) {
         let object = {};

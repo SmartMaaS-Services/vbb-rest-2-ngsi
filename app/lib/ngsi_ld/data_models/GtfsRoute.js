@@ -1,5 +1,5 @@
 /**
- * GtfsRoute NGSI LD data model
+ * GtfsRoute NGSI-LD data model
  * 
  * NGSI harmonization based on FIWARE data models specified on https://fiware-datamodels.readthedocs.io/en/latest/UrbanMobility/doc/introduction/index.html
  */
@@ -21,7 +21,7 @@ const NGSI = require('../../helpers/ngsi.js');
 dotenv.config();
 
 
-// create a NGSI LD compliant object from a given route object
+// create a NGSI-LD compliant object from a given route object
 const createFrom = (route) => {
     if (route) {
         let object = {};

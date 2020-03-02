@@ -18,7 +18,7 @@ const GtfsStop = require('./data_models/GtfsStop.js');
 dotenv.config();
 
 
-// transform data objects into NGSI LD-compatible entity objects
+// transform data objects into NGSI-LD-compatible entity objects
 const transformIntoNGSI = (obj, type) => {
     if (type === 'GtfsAgency') {
         return GtfsAgency.createFrom(obj);
@@ -32,7 +32,7 @@ const transformIntoNGSI = (obj, type) => {
         return GtfsStop.createFrom(obj);
     }
 
-    logger.warn('transformIntoNGSI: given type matches no supported NGSI LD entity type');
+    logger.warn('transformIntoNGSI: given type matches no supported NGSI-LD entity type');
     return null;
 }
 
@@ -49,7 +49,7 @@ const filterableAttributes = (type) => {
         return ['name'];
     }
 
-    logger.warn('filterableAttributes: given type matches no supported NGSI LD entity type');
+    logger.warn('filterableAttributes: given type matches no supported NGSI-LD entity type');
     return [];
 }
 
