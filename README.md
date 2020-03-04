@@ -22,8 +22,6 @@ Node.js application that uses the [vbb-rest](https://github.com/derhuerst/vbb-re
 
 ## Current limitations ## 
 
-* `GtfsShape` entites in the NGSI-LD format can't currently be created because of some server-side processing issues with used geometry type `LineString`.
-
 * The NGSI data model types `GtfsService` and `GtfsTrip` are not considered yet. Although with regard to the relationship model these types should be harmonised, it's due to the implementation of the REST API that some information is not available or suitable for transformation into context data.
   
   * A `GtfsService` should reference a `GtfsAgency` but various defined service times for routes are not known or cannot be queried via API.
