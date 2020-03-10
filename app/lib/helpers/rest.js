@@ -84,6 +84,7 @@ const executeRequest = (method, url, headers, body) => {
         .catch(error => {
             logger.error(`executeRequest - failed request: ${requestConfig.method} '${requestConfig.url}'`);
             logger.error(error);
+            logger.error(`=> body:\n${JSON.stringify(requestConfig.data)}`);
             //reject(error);
             resolve(error);
         });
