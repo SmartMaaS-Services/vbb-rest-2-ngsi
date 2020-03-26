@@ -18,6 +18,7 @@ Node.js application that uses the [vbb-rest](https://github.com/derhuerst/vbb-re
 -   [Reading data from context brokers](#reading-data-from-context-brokers)
 -   [History data](#history-data)
 -   [Troubleshooting](#troubleshooting)
+-   [Known issues](#known-issues)
 -   [License](#license)
 
 ## Current limitations ## 
@@ -48,7 +49,283 @@ The second variant comprises a single service for the Node.js script. It acts as
 
 There is a configuration file `.env` containing environment variables used by the Node.js script. Some of the variables values have to be modified prior to initial startup, as the script uses those variables for connection management and data processing.<br>
 
-A list with a summary of currently supported variables will follow. In the meantime please check the content of the `.env` file.
+The following list gives a summary of currently supported variables and their description:
+
+<table>
+  <tbody>
+    <tr>
+      <th>Name</th>
+      <th>Description</th>
+      <th>Default value</th>
+    </tr>
+    <tr>
+      <th colspan="3">Application settings</th>
+    </tr>
+    <tr>
+      <td>
+        <code>APP_START_DELAY</code>
+      </td>
+      <td>
+        <p>delayed start: give other required services some time to get started before trying to connect to them [seconds]</p>
+        <p><i>mandatory</i></p>
+      </td>
+      <td>
+        20
+      </td>
+    </tr>
+    <tr>
+      <th colspan="3">VBB REST Data Source</th>
+    </tr>
+    <tr>
+      <td>
+        <code>VBBREST_BASE_URL</code>
+      </td>
+      <td>
+        <p>base URL (VBB REST data source)</p>
+        <p><i>mandatory</i></p>
+      </td>
+      <td>
+         https://3.vbb.transport.rest
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>VBBREST_QUERY_INTERVAL</code>
+      </td>
+      <td>
+        <p>interval for re-read data from REST API [seconds]</p>
+        <p>NOTE: 24 hours (86400 sec.) as default, please do not stress this public API too much!</p>
+        <p><i>mandatory</i></p>
+      </td>
+      <td>
+        86400
+      </td>
+    </tr>
+    <tr>
+      <th colspan="3">NGSI v2 Context Broker</th>
+    </tr>
+    <tr>
+      <td>
+        <code>BROKER_V2_BASE_URL</code>
+      </td>
+      <td>
+        <p>NGSI v2 context broker URL</p>
+        <p>NOTE: modify ONLY, when communicating with external context brokers, e.g. when executing <code>'./services-app-only'</code> which does NOT start any context broker!<br>
+          If this broker should not be used, just set an empty value.</p>
+        <p><i>optional</i></p>
+      </td>
+      <td>
+        http://orion-v2:1026/v2
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>BROKER_V2_AUTH_KEY</code>
+      </td>
+      <td>
+        <p>Auth key for 'Authorization' header</p>
+        <p><i>optional</i></p>
+      </td>
+      <td>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>BROKER_V2_API_KEY</code>
+      </td>
+      <td>
+        <p>API key (token for authenticaton)</p>
+        <p><i>optional</i></p>
+      </td>
+      <td>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>BROKER_V2_TENANT</code>
+      </td>
+      <td>
+        <p>tenant name (a tenant is a service aka domain on the context broker with its own isolated logical database)</p>
+        <p><i>optional</i></p>
+      </td>
+      <td>
+        vbb
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>BROKER_V2_SUBTENANT</code>
+      </td>
+      <td>
+        <p>sub-tenant name (a sub-tenant is a sub-service / service path aka project for the given tenant)</p>
+        <p><i>optional</i></p>
+      </td>
+      <td>
+        /public_transport
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>BROKER_V2_ENTITY_ID_SUFFIX</code>
+      </td>
+      <td>
+        <p>entity ID suffix (on creation will be appended to an entitys ID for a customized identification format, e.g. the ID suffix 'XY' for a <code>GtfsStop</code> entity '650030877901' will result in <code>GtfsStop:650030877901:XY</code>)</p>
+        <p><i>optional</i></p>
+      </td>
+      <td>
+      </td>
+    </tr>
+    <tr>
+      <th colspan="3">NGSI-LD Context Broker</th>
+    </tr>
+    <tr>
+      <td>
+        <code>BROKER_LD_BASE_URL</code>
+      </td>
+      <td>
+        <p>NGSI-LD context broker URL</p>
+        <p>NOTE: modify ONLY, when communicating with external context brokers, e.g. when executing <code>'./services-app-only'</code> which does NOT start any context broker!<br>
+          If this broker should not be used, just set an empty value.</p>
+        <p><i>optional</i></p>
+      </td>
+      <td>
+        http://orion-ld:1026/ngsi-ld/v1
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>BROKER_LD_AUTH_KEY</code>
+      </td>
+      <td>
+        <p>Auth key for 'Authorization' header</p>
+        <p><i>optional</i></p>
+      </td>
+      <td>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>BROKER_LD_API_KEY</code>
+      </td>
+      <td>
+        <p>API key (token for authenticaton)</p>
+        <p><i>optional</i></p>
+      </td>
+      <td>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>BROKER_LD_TENANT</code>
+      </td>
+      <td>
+        <p>tenant name (a tenant is a service aka domain on the context broker with its own isolated logical database)</p>
+        <p><i>optional</i></p>
+      </td>
+      <td>
+        vbb
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>BROKER_LD_SUBTENANT</code>
+      </td>
+      <td>
+        <p>sub-tenant name (a sub-tenant is a sub-service / service path aka project for the given tenant)</p>
+        <p><i>optional</i></p>
+      </td>
+      <td>
+        /public_transport
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>BROKER_LD_ENTITY_ID_SUFFIX</code>
+      </td>
+      <td>
+        <p>entity ID suffix (on creation will be appended to an entitys ID for a customized identification format, e.g. the ID suffix 'XY' for a <code>GtfsStop</code> entity '650030877901' will result in <code>urn:ngsi-ld:GtfsStop:650030877901:XY</code>)</p>
+        <p><i>optional</i></p>
+      </td>
+      <td>
+      </td>
+    </tr>
+    <tr>
+      <th colspan="3">Historic data persistence</th>
+    </tr>
+    <tr>
+      <td>
+        <code>ENABLE_HISTORIC_DATA_STORAGE</code>
+      </td>
+      <td>
+        <p>enables storage of historic data (into Crate-DB via QuantumLeap API for now) - support for NGSI v2 data only</p>
+        <p><i>optional</i></p>
+      </td>
+      <td>
+        true
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>QL_V2_NOTIFICATION_BASE_URL</code>
+      </td>
+      <td>
+        <p>QuantumLeap (QL) notification URL used for sending status changes of entities in the context broker</p>
+        <p>NOTE: modify ONLY, when communicating with external QL instances, e.g. when executing <code>'./services-app-only'</code> which does NOT start any QL instance!<br>
+          If historic data persistence via QL is not wanted, just set an empty value.</p>
+        <p><i>optional</i></p>
+      </td>
+      <td>
+        http://quantumleap:8668/v2
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>QL_V2_AUTH_KEY</code>
+      </td>
+      <td>
+        <p>Auth key for 'Authorization' header in requests to QL</p>
+        <p><i>optional</i></p>
+      </td>
+      <td>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>QL_V2_API_KEY</code>
+      </td>
+      <td>
+        <p>API key for authentication on QL</p>
+        <p><i>optional</i></p>
+      </td>
+      <td>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>QL_V2_TENANT</code>
+      </td>
+      <td>
+        <p>tenant name on QL</p>
+        <p><i>optional</i></p>
+      </td>
+      <td>
+        vbb
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>QL_V2_SUBTENANT</code>
+      </td>
+      <td>
+        <p>sub-tenant name on QL</p>
+        <p><i>optional</i></p>
+      </td>
+      <td>
+        /public_transport
+      </td>
+    </tr>
+  </tbody>
+</table>
 
 
 ## Starting Docker containers ##
@@ -178,6 +455,20 @@ In order to avoid this, increase maximum number of memory map areas before start
 ``` bash
 sudo sysctl -w vm.max_map_count=262144
 ```
+
+
+## Known issues ##
+
+Due to some open issues of the NGSI-LD context broker, unexpected behaviour and errors may appear while executing the script.
+
+* Preceding incomplete query results, causing the Node.js script to attempt to recreate existing entities:<br>
+https://github.com/FIWARE/context.Orion-LD/issues/405
+  
+* Sudden interruption of socket connections to the context broker, making the Orion-LD unreachable afterwards:<br>
+https://github.com/FIWARE/context.Orion-LD/issues/408
+  
+* Unmotivated crashes of the Orion-LD, which also makes the broker unreachable:<br>
+https://github.com/FIWARE/context.Orion-LD/issues/406
 
 
 ## License ##
