@@ -28,7 +28,7 @@ class ContextBroker {
 
     // set additional headers
         if (process.env.BROKER_LD_AUTH_KEY) {
-            headers['Authorization'] = process.env.BROKER_LD_AUTH_KEY;
+            headers['Authorization'] = 'Bearer ' + process.env.BROKER_LD_AUTH_KEY;
         }
         if (process.env.BROKER_LD_API_KEY) {
             headers['X-Api-Key'] = process.env.BROKER_LD_API_KEY;

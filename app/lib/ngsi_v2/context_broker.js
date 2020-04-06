@@ -28,7 +28,7 @@ class ContextBroker {
 
     // set additional headers
         if (process.env.BROKER_V2_AUTH_KEY) {
-            headers['Authorization'] = process.env.BROKER_V2_AUTH_KEY;
+            headers['Authorization'] = 'Bearer ' + process.env.BROKER_V2_AUTH_KEY;
         }
         if (process.env.BROKER_V2_API_KEY) {
             headers['X-Api-Key'] = process.env.BROKER_V2_API_KEY;
@@ -49,7 +49,7 @@ class ContextBroker {
 
     // set additional headers
         if (process.env.QL_V2_AUTH_KEY) {
-            headers['Authorization'] = process.env.QL_V2_AUTH_KEY;
+            headers['Authorization'] = 'Bearer ' + process.env.QL_V2_AUTH_KEY;
         }
         if (process.env.QL_V2_API_KEY) {
             headers['X-Api-Key'] = process.env.QL_V2_API_KEY;
