@@ -29,8 +29,8 @@ Node.js application that uses the [vbb-rest](https://github.com/derhuerst/vbb-re
   
   * A `GtfsTrip` may reference a `GtfsShape`, should reference a `GtfsService` and a `GtfsRoute`, but a trip ID always includes date of the day and is often regenerated. Therefore its form is not suitable for transformation into a NGSI entity with fixed ID.
 
-* Instead of querying all stations (~ 13000) from the vbb-rest API only a small subset of 10 selected stations are processed for now. The code still needs some throttling mechanism to handle the actual amount of API data in parallel.<br>
-Furthermore just one possible journey of some selected connections (station A -> station B) are picked. It is planned to include all journeys at some point.
+* Due to runtime reasons, instead of querying all stations (~ 13000) from the vbb-rest API only a static subset of 10 selected stations is processed for now.<br>
+Furthermore just one possible journey of 10 selected connections (station A -> station B) is picked. It is planned to include all stops/stations and journeys at some point.
 
 
 ## Prerequisites ##
