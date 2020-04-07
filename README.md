@@ -14,6 +14,7 @@ Node.js application that uses the [vbb-rest](https://github.com/derhuerst/vbb-re
 -   [Operation modes](#operation-modes)
 -   [Configuration](#configuration)
 -   [Starting Docker containers](#starting-docker-containers)
+-   [GTFS entity relationships](#gtfs-entity-relationships)
 -   [NGSI data models](#ngsi-data-models)
 -   [Reading data from context brokers](#reading-data-from-context-brokers)
 -   [History data](#history-data)
@@ -333,6 +334,11 @@ The following list gives a summary of currently supported variables and their de
 Depending on what operation mode is preferred, pull/create the images and start containers by running `./services create && ./services start` (client-server mode) or simply `./services-app-only start` (client mode) from the project root folder.<br>
 To stop the containers run `./services[-app-only] stop`.<br>
 If you encounter problems executing the service scripts, add the missing permission with `chmod +x services*`.
+
+
+## GTFS entity relationships ##
+
+![GTFS entity relationships](docs/images/gtfs_entity_relationships.svg)
 
 
 ## NGSI data models ##
