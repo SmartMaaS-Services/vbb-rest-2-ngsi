@@ -46,7 +46,7 @@ class ContextBroker {
     getExistingEntities(brokerUrl, params) {
         const paramsString = REST.stringifyUrlParamsObject(params);
         const headers = this.setRequestHeaders({'Accept': 'application/ld+json', 
-                                            'Link': '<https://schema.lab.fiware.org/ld/context>; rel="http://www.w3.org/ns/json-ld#context"; type="application/ld+json"'
+                                            'Link': '<https://fiware.github.io/data-models/context.jsonld>; rel="http://www.w3.org/ns/json-ld#context"; type="application/ld+json"'
                                         });
         return this.REQ_LIMITER.schedule(() => REST.executeRequest('GET', `${brokerUrl}/entities${paramsString}`, headers, null));
     }

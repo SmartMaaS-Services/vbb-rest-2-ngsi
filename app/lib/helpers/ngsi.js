@@ -22,8 +22,7 @@ const sanitizeString = (value) => ('' + value).replace(/[\x00-\x1F\x7F-\x9F<>"'=
 const sanitizeIdFieldString = (value) => sanitizeString(value).replace(/[\s&?\/#]/g, '');
 
 const ldAtContextValue = () => [
-    "https://schema.lab.fiware.org/ld/context",
-    "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
+    "https://fiware.github.io/data-models/context.jsonld"
 ];
 
 
