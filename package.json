@@ -4,7 +4,7 @@
   "description": "Node.js application that uses the vbb-rest API to read public transport data of the Verkehrsverbund Berlin-Brandenburg (VBB) and transform it from FTPF into a NGSI-compliant data format for subsequent storage in FIWARE NGSI context brokers. Applied FIWARE data models implement the General Transit Feed Specification (GTFS).",
   "main": "index.js",
   "dependencies": {
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "bottleneck": "^2.19.5",
     "dotenv": "^8.2.0",
     "pino": "^5.16.0",
