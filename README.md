@@ -9,7 +9,7 @@
 
 <p align="center">
   <a href="mailto:info@smart-maas.eu">Contact</a> •
-  <a href="https://github.com/SmartMaaS-Services/Transaction-Context-Manager/issues">Issues</a> •
+  <a href="https://github.com/SmartMaaS-Services/vbb-rest-2-ngsi/issues">Issues</a> •
   <a href="https://smart-maas.eu/en/">Project Page</a>
 </p>
 
